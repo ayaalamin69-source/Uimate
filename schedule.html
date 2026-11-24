@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>UniMate - Study Schedule</title>
+
+<link rel="stylesheet" href="stylecss.css">
+
+</head><body><header>
+    <h2 class="logo">UniMate</h2><nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="courses.html">My Courses</a>
+    <a href="summaries.html">Summaries</a>
+    <a href="schedule.html">Study Schedule</a>
+    <a href="quizzes.html">Quizzes</a>
+    <a href="progresos.html">My Progress</a>
+    <a href="about.html">About</a>
+</nav>
+
+</header><section class="schedule-section"><h1>My Study Schedule</h1>
+
+<p class="intro">
+    Plan your study time and stay organized.
+</p>
+
+<div class="schedule-form">
+
+    <h2>Add New Task</h2>
+
+    <input type="text" id="taskName"
+    placeholder="Task Name">
+
+    <input type="text" id="taskSubject"
+    placeholder="Subject Name">
+
+    <label>Study Date</label>
+
+    <input type="date" id="taskDate">
+
+    <label>Study Time</label>
+
+    <input type="time" id="taskTime">
+
+    <button onclick="addTask()">
+        Add Task
+    </button>
+
+</div>
+
+<h2 class="my-title">My Tasks</h2>
+
+<div id="taskList"></div>
+
+</section><script>
+
+let tasks = JSON.parse(
+    localStorage.getItem("unimateTasks") || "[]"
+);
+
+function displayTasks() {
+
+    let list = document.getElementById("taskList");
+
+    list.innerHTML = "";
+
+    if (tasks.length === 0) {
+
+        list.textContent = "No tasks added yet.";
+
+        return;
+    }
+
+    tasks.forEach(function(task, index) {
+
+        let card = document.createElement("div");
+
+        card.className = "task-card";
+
+        let title = document.createElement("h3");
+        title.textContent = task.name;
+
+        let subject = document.createElement("p");
+        subject.textContent = "Subject: " + task.subject;
+
+        let date = document.createElement("p");
+        date.textContent = "Date: " + task.date;
+
+        let time = document.createElement("p");
+        time.textContent = "Time: " + task.time;
+
+        let button = document.createElement("button");
+
+        button.textContent = "Delete Task";
+
+        button.onclick = function() {
+
+            tasks.splice(index, 1);
+
+            localStorage.setItem(
+                "unimateTasks",
+                JSON.stringify(tasks)
+            );
+
+            displayTasks();
+
+        };
+
+        card.appendChild(title);
+        card.appendChild(subject);
+        card.appendChild(date);
+        card.appendChild(time);
+        card.appendChild(button);
+
+        list.appendChild(card);
+
+    });
+
+}
+
+function addTask() {
+
+    let name = document.getElementById("taskName").value.trim();
+
+    let subject = document.getElementById("taskSubject").value.trim();
+
+    let date = document.getElementById("taskDate").value;
+
+    let time = document.getElementById("taskTime").value;
+
+    if (!name || !subject || !date || !time) {
+
+        alert("Please fill in all fields.");
+
+        return;
+    }
+
+    tasks.push({
+        name: name,
+        subject: subject,
+        date: date,
+        time: time
+    });
+
+    localStorage.setItem(
+        "unimateTasks",
+        JSON.stringify(tasks)
+    );
+
+    document.getElementById("taskName").value = "";
+    document.getElementById("taskSubject").value = "";
+    document.getElementById("taskDate").value = "";
+    document.getElementById("taskTime").value = "";
+
+    displayTasks();
+
+}
+
+displayTasks();
+
+</script></body>
+</html>

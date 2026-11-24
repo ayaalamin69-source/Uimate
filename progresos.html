@@ -1,0 +1,230 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>UniMate - Academic Progress</title>
+
+<link rel="stylesheet" href="stylecss.css">
+
+</head><body><header>
+    <h2 class="logo">UniMate</h2><nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="courses.html">My Courses</a>
+    <a href="summaries.html">Summaries</a>
+    <a href="schedule.html">Study Schedule</a>
+    <a href="quizzes.html">Quizzes</a>
+    <a href="progresos.html">My Progress</a>
+    <a href="about.html">About</a>
+</nav>
+
+</header><section class="progress-section"><h1>My Academic Progress</h1>
+
+<p class="intro">
+    Track your achievements and reach your academic goals.
+</p>
+
+<div class="progress-overview">
+
+    <div class="progress-box">
+        <h3>Total Goals</h3>
+        <p id="totalGoals">0</p>
+    </div>
+
+    <div class="progress-box">
+        <h3>Completed</h3>
+        <p id="completedGoals">0</p>
+    </div>
+
+    <div class="progress-box">
+        <h3>Progress</h3>
+        <p id="progressPercent">0%</p>
+    </div>
+
+</div>
+
+<div class="progress-bar-container">
+
+    <h2>Overall Progress</h2>
+
+    <div class="progress-bar">
+        <div id="progressFill"></div>
+    </div>
+
+</div>
+
+<div class="goal-form">
+
+    <h2>Add a New Goal</h2>
+
+    <input type="text" id="goalName"
+    placeholder="Enter your academic goal">
+
+    <button onclick="addGoal()">
+        Add Goal
+    </button>
+
+</div>
+
+<h2 class="my-title">My Academic Goals</h2>
+
+<div id="goalList"></div>
+
+</section><script>
+
+let goals = JSON.parse(
+    localStorage.getItem("unimateGoals") || "[]"
+);
+
+function saveGoals() {
+
+    localStorage.setItem(
+        "unimateGoals",
+        JSON.stringify(goals)
+    );
+
+}
+
+function addGoal() {
+
+    let name = document.getElementById("goalName").value.trim();
+
+    if (name === "") {
+
+        alert("Please enter your goal.");
+
+        return;
+
+    }
+
+    goals.push({
+
+        name: name,
+        completed: false
+
+    });
+
+    saveGoals();
+
+    document.getElementById("goalName").value = "";
+
+    displayGoals();
+
+}
+
+function toggleGoal(index) {
+
+    goals[index].completed = !goals[index].completed;
+
+    saveGoals();
+
+    displayGoals();
+
+}
+
+function deleteGoal(index) {
+
+    goals.splice(index, 1);
+
+    saveGoals();
+
+    displayGoals();
+
+}
+
+function displayGoals() {
+
+    let list = document.getElementById("goalList");
+
+    list.innerHTML = "";
+
+    let completed = goals.filter(
+        goal => goal.completed
+    ).length;
+
+    let total = goals.length;
+
+    let percentage = total === 0
+        ? 0
+        : Math.round((completed / total) * 100);
+
+    document.getElementById("totalGoals").textContent = total;
+
+    document.getElementById("completedGoals").textContent = completed;
+
+    document.getElementById("progressPercent").textContent =
+        percentage + "%";
+
+    document.getElementById("progressFill").style.width =
+        percentage + "%";
+
+    if (total === 0) {
+
+        list.textContent = "No goals added yet.";
+
+        return;
+
+    }
+
+    goals.forEach(function(goal, index) {
+
+        let card = document.createElement("div");
+
+        card.className = "goal-card";
+
+        let title = document.createElement("h3");
+
+        title.textContent = goal.name;
+
+        if (goal.completed) {
+
+            title.classList.add("completed-goal");
+
+        }
+
+        let status = document.createElement("p");
+
+        status.textContent = goal.completed
+            ? "Status: Completed"
+            : "Status: In Progress";
+
+        let completeButton = document.createElement("button");
+
+        completeButton.textContent = goal.completed
+            ? "Undo"
+            : "Mark as Completed";
+
+        completeButton.onclick = function() {
+
+            toggleGoal(index);
+
+        };
+
+        let deleteButton = document.createElement("button");
+
+        deleteButton.textContent = "Delete";
+
+        deleteButton.className = "delete-goal";
+
+        deleteButton.onclick = function() {
+
+            deleteGoal(index);
+
+        };
+
+        card.appendChild(title);
+
+        card.appendChild(status);
+
+        card.appendChild(completeButton);
+
+        card.appendChild(deleteButton);
+
+        list.appendChild(card);
+
+    });
+
+}
+
+displayGoals();
+
+</script></body>
+</html>

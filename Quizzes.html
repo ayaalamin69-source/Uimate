@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniMate - Quizzes</title>
+    <link rel="stylesheet" href="stylecss.css">
+
+    <style>
+        .quiz-container {
+            max-width: 750px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .quiz-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #6b3448;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4d2434;
+        }
+
+        .option {
+            display: block;
+            background: #f5f0f1;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .option input {
+            margin-right: 10px;
+        }
+
+        #questionArea, #resultArea {
+            display: none;
+        }
+
+        #feedback {
+            font-weight: bold;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="courses.html">My Courses</a>
+    <a href="summaries.html">Summaries</a>
+    <a href="schedule.html">Study Schedule</a>
+    <a href="quizzes.html">Quizzes</a>
+    <a href="progresos.html">My Progress</a>
+    <a href="about.html">About</a>
+</nav>
+
+<div class="quiz-container">
+
+    <h1>Smart Quizzes</h1>
+    <p>Choose your subject and test your knowledge!</p>
+
+    <div class="quiz-box" id="startArea">
+
+        <label for="subject">Choose Your Subject:</label>
+
+        <select id="subject">
+            <option value="">-- Select Subject --</option>
+            <option value="computer">Computer Skills - مهارات حاسوب</option>
+            <option value="calculus">Calculus - كالكلوس</option>
+            <option value="probability">Probability - احتمالات</option>
+            <option value="discrete">Discrete Mathematics - رياضيات متقطعة</option>
+            <option value="geometry">Analytic Geometry - هندسة تحليلية</option>
+            <option value="methods">Programming Methods - طرق البرمجة</option>
+            <option value="networking">Networking - شبكات</option>
+            <option value="cprogramming">Programming (C) - البرمجة</option>
+        </select>
+
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div class="quiz-box" id="questionArea">
+        <h2 id="quizTitle"></h2>
+        <p id="questionNumber"></p>
+        <h3 id="questionText"></h3>
+
+        <div id="optionsArea"></div>
+
+        <p id="feedback"></p>
+
+        <button id="nextButton" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <div class="quiz-box" id="resultArea">
+        <h2>Quiz Completed!</h2>
+        <h3 id="scoreText"></h3>
+        <p id="percentageText"></p>
+        <button onclick="restartQuiz()">Try Again</button>
+        <button onclick="backToSubjects()">Choose Another Subject</button>
+    </div>
+
+</div>
+
+<script>
+
+const questionBank = {
+
+computer: [
+{
+q: "What does CPU stand for?",
+o: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Control Power Unit"],
+a: 0
+},
+{
+q: "Which device is used to enter text?",
+o: ["Monitor", "Keyboard", "Printer", "Speaker"],
+a: 1
+},
+{
+q: "Which one is an operating system?",
+o: ["Windows", "Google", "HTML", "Mouse"],
+a: 0
+},
+{
+q: "What is the main function of RAM?",
+o: ["Permanent storage", "Temporary memory", "Printing", "Internet connection"],
+a: 1
+},
+{
+q: "Which of these is an output device?",
+o: ["Keyboard", "Mouse", "Monitor", "Scanner"],
+a: 2
+}
+],
+
+calculus: [
+{
+q: "What is the derivative of x²?",
+o: ["x", "2x", "2", "x³"],
+a: 1
+},
+{
+q: "What is the derivative of a constant?",
+o: ["1", "The constant", "0", "x"],
+a: 2
+},
+{
+q: "What is the integral of 1 with respect to x?",
+o: ["1", "x + C", "0", "x² + C"],
+a: 1
+},
+{
+q: "What is the limit of x + 2 as x approaches 3?",
+o: ["2", "3", "5", "6"],
+a: 2
+},
+{
+q: "What is the derivative of 3x?",
+o: ["3", "x", "3x²", "0"],
+a: 0
+}
+],
+
+probability: [
+{
+q: "What is the probability of getting heads when tossing a fair coin?",
+o: ["0", "1/4", "1/2", "1"],
+a: 2
+},
+{
+q: "What is the probability of an impossible event?",
+o: ["0", "1/2", "1", "2"],
+a: 0
+},
+{
+q: "A standard die has how many sides?",
+o: ["4", "5", "6", "8"],
+a: 2
+},
+{
+q: "What is the probability of getting a 7 on a standard die?",
+o: ["1", "1/6", "0", "1/2"],
+a: 2
+},
+{
+q: "The probability of a certain event is:",
+o: ["0", "0.5", "1", "2"],
+a: 2
+}
+],
+
+discrete: [
+{
+q: "Which symbol commonly represents AND in logic?",
+o: ["∨", "∧", "¬", "→"],
+a: 1
+},
+{
+q: "What is the negation of TRUE?",
+o: ["TRUE", "FALSE", "BOTH", "UNKNOWN"],
+a: 1
+},
+{
+q: "A set is a collection of:",
+o: ["Ordered instructions", "Distinct elements", "Only numbers", "Computer files"],
+a: 1
+},
+{
+q: "What is the cardinality of {1, 2, 3}?",
+o: ["1", "2", "3", "4"],
+a: 2
+},
+{
+q: "Which symbol means OR in logic?",
+o: ["∧", "∨", "¬", "∩"],
+a: 1
+}
+],
+
+geometry: [
+{
+q: "What is the distance formula between two points?",
+o: ["√((x₂-x₁)²+(y₂-y₁)²)", "x + y", "xy", "x² + y²"],
+a: 0
+},
+{
+q: "What is the slope of a horizontal line?",
+o: ["1", "0", "Undefined", "-1"],
+a: 1
+},
+{
+q: "What is the equation of a circle centered at the origin?",
+o: ["x + y = r", "x² + y² = r²", "y = mx + c", "x² - y² = r²"],
+a: 1
+},
+{
+q: "What is the midpoint of (0,0) and (4,4)?",
+o: ["(2,2)", "(4,4)", "(1,1)", "(0,4)"],
+a: 0
+},
+{
+q: "A vertical line has an:",
+o: ["Zero slope", "Undefined slope", "Slope of 1", "Negative slope"],
+a: 1
+}
+],
+
+methods: [
+{
+q: "What is an algorithm?",
+o: ["A computer device", "A step-by-step solution", "A programming language", "An operating system"],
+a: 1
+},
+{
+q: "What is a flowchart used for?",
+o: ["Drawing pictures", "Representing an algorithm", "Storing data", "Playing games"],
+a: 1
+},
+{
+q: "Which flowchart symbol represents a decision?",
+o: ["Rectangle", "Oval", "Diamond", "Circle"],
+a: 2
+},
+{
+q: "What is pseudocode?",
+o: ["A computer virus", "An informal description of an algorithm", "A hardware device", "A database"],
+a: 1
+},
+{
+q: "What is the first step in solving a programming problem?",
+o: ["Writing code immediately", "Understanding the problem", "Printing the result", "Deleting variables"],
+a: 1
+}
+],
+
+networking: [
+{
+q: "What does LAN stand for?",
+o: ["Local Area Network", "Large Access Number", "Long Area Node", "Local Automatic Network"],
+a: 0
+},
+{
+q: "Which device connects different networks?",
+o: ["Keyboard", "Router", "Monitor", "Printer"],
+a: 1
+},
+{
+q: "What does IP stand for?",
+o: ["Internet Protocol", "Internal Program", "Input Process", "Internet Printer"],
+a: 0
+},
+{
+q: "Which protocol is commonly used for web browsing?",
+o: ["HTTP", "FTP only", "SMTP only", "Bluetooth"],
+a: 0
+},
+{
+q: "What is the main purpose of a switch?",
+o: ["Connect devices in a LAN", "Print documents", "Store files", "Display images"],
+a: 0
+}
+],
+
+cprogramming: [
+{
+q: "Which function is the starting point of a C program?",
+o: ["start()", "main()", "run()", "begin()"],
+a: 1
+},
+{
+q: "Which symbol ends a statement in C?",
+o: [".", ",", ";", ":"],
+a: 2
+},
+{
+q: "Which format specifier is used for an integer?",
+o: ["%f", "%c", "%d", "%s"],
+a: 2
+},
+{
+q: "Which keyword is used to declare an integer variable?",
+o: ["int", "float", "char", "print"],
+a: 0
+},
+{
+q: "Which function displays output in C?",
+o: ["scanf()", "printf()", "input()", "read()"],
+a: 1
+}
+]
+
+};
+
+const subjectNames = {
+computer: "Computer Skills",
+calculus: "Calculus",
+probability: "Probability",
+discrete: "Discrete Mathematics",
+geometry: "Analytic Geometry",
+methods: "Programming Methods",
+networking: "Networking",
+cprogramming: "Programming (C)"
+};
+
+let questions = [];
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function startQuiz() {
+
+    const subject = document.getElementById("subject").value;
+
+    if (!subject) {
+        alert("Please choose a subject first.");
+        return;
+    }
+
+    questions = [...questionBank[subject]]
+        .sort(() => Math.random() - 0.5);
+
+    currentQuestion = 0;
+    score = 0;
+
+    document.getElementById("startArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "none";
+    document.getElementById("questionArea").style.display = "block";
+
+    document.getElementById("quizTitle").textContent = subjectNames[subject];
+
+    showQuestion();
+}
+
+function showQuestion() {
+
+    answered = false;
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("questionNumber").textContent =
+        "Question " + (currentQuestion + 1) + " of " + questions.length;
+
+    document.getElementById("questionText").textContent = q.q;
+
+    const optionsArea = document.getElementById("optionsArea");
+    optionsArea.innerHTML = "";
+
+    document.getElementById("feedback").textContent = "";
+
+    q.o.forEach((option, index) => {
+
+        const label = document.createElement("label");
+        label.className = "option";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "answer";
+        radio.value = index;
+
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(option));
+
+        optionsArea.appendChild(label);
+    });
+
+    document.getElementById("nextButton").textContent =
+        currentQuestion === questions.length - 1
+        ? "Finish Quiz"
+        : "Next Question";
+}
+
+function nextQuestion() {
+
+    if (!answered) {
+
+        const selected = document.querySelector(
+            'input[name="answer"]:checked'
+        );
+
+        if (!selected) {
+            alert("Please select an answer.");
+            return;
+        }
+
+        const correct = questions[currentQuestion].a;
+        const chosen = Number(selected.value);
+
+        if (chosen === correct) {
+            score++;
+            document.getElementById("feedback").textContent =
+                "Correct answer!";
+        } else {
+            document.getElementById("feedback").textContent =
+                "Incorrect. Correct answer: " +
+                questions[currentQuestion].o[correct];
+        }
+
+        answered = true;
+
+        document.querySelectorAll('input[name="answer"]')
+            .forEach(input => input.disabled = true);
+
+        document.getElementById("nextButton").textContent =
+            currentQuestion === questions.length - 1
+            ? "Show Result"
+            : "Continue";
+
+        return;
+    }
+
+    currentQuestion++;
+
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+
+    document.getElementById("questionArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "block";
+
+    const percentage = (score / questions.length) * 100;
+
+    document.getElementById("scoreText").textContent =
+        "Your Score: " + score + " / " + questions.length;
+
+    document.getElementById("percentageText").textContent =
+        "Percentage: " + percentage + "%";
+}
+
+function restartQuiz() {
+
+    document.getElementById("resultArea").style.display = "none";
+
+    const subject = document.getElementById("subject").value;
+
+    questions = [...questionBank[subject]]
+        .sort(() => Math.random() - 0.5);
+
+    currentQuestion = 0;
+    score = 0;
+
+    document.getElementById("questionArea").style.display = "block";
+
+    showQuestion();
+}
+
+function backToSubjects() {
+
+    document.getElementById("resultArea").style.display = "none";
+    document.getElementById("startArea").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>

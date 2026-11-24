@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>UniMate - Lecture Summaries</title>
+
+    <link rel="stylesheet" href="stylecss.css">
+</head>
+
+<body>
+
+<header>
+    <h2 class="logo">UniMate</h2>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="courses.html">My Courses</a>
+        <a href="summaries.html">Summaries</a>
+        <a href="schedule.html">Study Schedule</a>
+        <a href="quizzes.html">Quizzes</a>
+        <a href="progresos.html">My Progress</a>
+        <a href="about.html">About</a>
+    </nav>
+</header>
+
+<section class="summary-section">
+
+    <h1>Lecture Summaries</h1>
+
+    <p class="intro">
+        Organize your lectures and keep your study
+        materials in one place.
+    </p>
+
+    <div class="summary-form">
+
+        <h2>Add New Summary</h2>
+
+        <input
+            type="text"
+            id="summaryTitle"
+            placeholder="Lecture Title"
+        >
+
+        <input
+            type="text"
+            id="subjectName"
+            placeholder="Subject Name"
+        >
+
+        <textarea
+            id="summaryContent"
+            placeholder="Write your lecture summary here..."
+        ></textarea>
+
+        <button onclick="saveSummary()">
+            Save Summary
+        </button>
+
+    </div>
+
+    <h2 class="my-title">My Summaries</h2>
+
+    <input
+        type="text"
+        id="searchSummary"
+        placeholder="Search summaries..."
+        oninput="displaySummaries()"
+    >
+
+    <div id="summaryList"></div>
+
+</section>
+
+<script>
+
+let database;
+
+// Open existing database
+let request = indexedDB.open("UniMateDB", 1);
+
+request.onupgradeneeded = function(event) {
+
+    database = event.target.result;
+
+    if (!database.objectStoreNames.contains("summaries")) {
+
+        database.createObjectStore("summaries", {
+            keyPath: "id",
+            autoIncrement: true
+        });
+
+    }
+};
+
+request.onsuccess = function(event) {
+
+    database = event.target.result;
+
+    displaySummaries();
+
+};
+
+request.onerror = function() {
+
+    alert("Unable to open the database.");
+
+};
+
+
+// Save a new summary
+function saveSummary() {
+
+    let title = document
+        .getElementById("summaryTitle")
+        .value.trim();
+
+    let subject = document
+        .getElementById("subjectName")
+        .value.trim();
+
+    let content = document
+        .getElementById("summaryContent")
+        .value.trim();
+
+    if (title === "" || subject === "" || content === "") {
+
+        alert("Please fill in all fields.");
+
+        return;
+    }
+
+    let summary = {
+
+        title: title,
+        subject: subject,
+        content: content
+
+    };
+
+    let transaction = database.transaction(
+        ["summaries"],
+        "readwrite"
+    );
+
+    transaction.objectStore("summaries").add(summary);
+
+    transaction.oncomplete = function() {
+
+        alert("Summary saved successfully!");
+
+        document.getElementById("summaryTitle").value = "";
+        document.getElementById("subjectName").value = "";
+        document.getElementById("summaryContent").value = "";
+
+        displaySummaries();
+
+    };
+
+    transaction.onerror = function() {
+
+        alert("Unable to save summary.");
+
+    };
+
+}
+
+
+// Display and search summaries
+function displaySummaries() {
+
+    if (!database) return;
+
+    let transaction = database.transaction(
+        ["summaries"],
+        "readonly"
+    );
+
+    let store = transaction.objectStore("summaries");
+
+    let request = store.getAll();
+
+    request.onsuccess = function() {
+
+        let list = document.getElementById("summaryList");
+
+        let search = document
+            .getElementById("searchSummary")
+            .value.toLowerCase().trim();
+
+        list.innerHTML = "";
+
+        let results = request.result.filter(item =>
+
+            (item.title || "").toLowerCase().includes(search) ||
+
+            (item.subject || "").toLowerCase().includes(search) ||
+
+            (item.content || "").toLowerCase().includes(search)
+
+        );
+
+        results.forEach(item => {
+
+            let card = document.createElement("div");
+
+            card.className = "summary-card";
+
+            let title = document.createElement("h3");
+
+            title.textContent = item.title;
+
+            let subject = document.createElement("p");
+
+            subject.textContent = "Subject: " + item.subject;
+
+            let content = document.createElement("p");
+
+            content.textContent = item.content || "";
+
+            card.appendChild(title);
+
+            card.appendChild(subject);
+
+            card.appendChild(content);
+
+            let deleteButton = document.createElement("button");
+
+            deleteButton.type = "button";
+
+            deleteButton.textContent = "Delete Summary";
+
+            deleteButton.onclick = function() {
+
+                deleteSummary(item.id);
+
+            };
+
+            card.appendChild(deleteButton);
+
+            list.appendChild(card);
+
+        });
+
+        if (results.length === 0) {
+
+            list.textContent = "No summaries found.";
+
+        }
+
+    };
+
+    request.onerror = function() {
+
+        alert("Unable to load summaries.");
+
+    };
+
+}
+
+
+// Delete a summary
+function deleteSummary(id) {
+
+    if (confirm("Are you sure you want to delete this summary?")) {
+
+        let transaction = database.transaction(
+            ["summaries"],
+            "readwrite"
+        );
+
+        transaction.objectStore("summaries").delete(id);
+
+        transaction.oncomplete = function() {
+
+            alert("Summary deleted successfully!");
+
+            displaySummaries();
+
+        };
+
+        transaction.onerror = function() {
+
+            alert("Unable to delete this summary.");
+
+        };
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
